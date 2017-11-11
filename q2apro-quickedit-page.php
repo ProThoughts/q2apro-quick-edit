@@ -33,7 +33,7 @@
 				array(
 					'title' => 'Quick Tagger Page', // title of page
 					'request' => 'quickedit', // request name
-					'nav' => 'M', // 'M'=main, 'F'=footer, 'B'=before main, 'O'=opposite main, null=none
+					'nav' => 'F', // 'M'=main, 'F'=footer, 'B'=before main, 'O'=opposite main, null=none
 				),
 			);
 		}
@@ -81,7 +81,7 @@
 					// check for ** edit history plugin ** - waiting for plugin_exists($plugin) in v1.7
 					// instead we check for the existing table
 					$result = qa_db_query_sub('SHOW TABLES LIKE "^edit_history"');
-					$tableExists = mysql_num_rows($result) > 0;
+					$tableExists = mysqli_num_rows($result) > 0;
 					if($tableExists) {
 						// save edit history if title has been changed
 						$postDataOld = qa_db_read_one_assoc(qa_db_query_sub('SELECT title,content,tags FROM ^posts
@@ -149,11 +149,15 @@
 			$pagesize = 500; // items per page
 			$count = qa_opt('cache_qcount'); // items total
 			$qa_content['page_links'] = qa_html_page_links(qa_request(), $start, $pagesize, $count, true); // last parameter is prevnext
+				$tagfilter = $_GET['tagfilter'];
+			$tagstring = '';
+			if($tagfilter) $tagstring = " and tags like '%".$tagfilter."%'";
+			
 			
 			// query to get all posts according to pagination, ignore closed questions
 			$queryAllPosts = qa_db_query_sub('SELECT postid,tags,title,content,format FROM `^posts`
 												WHERE `type` = "Q"
-												AND `closedbyid` IS NULL
+												AND `closedbyid` IS NULL'. $tagstring.' 
 												ORDER BY postid DESC
 												LIMIT #,#
 											', $start, $pagesize);
@@ -169,10 +173,17 @@
 				$text=qa_viewer_text($row['content'], $row['format'], array('blockwordspreg' => $blockwordspreg));
 				$contentPreview = qa_html(qa_shorten_string_line($text, $maxlength));
 				$tagtable .= '
+
 					<tr data-original="'.$row['postid'].'">
 						<td><a class="tooltipS" title="'.$contentPreview.'" target="_blank" href="./'.$row['postid'].'?state=edit-'.$row['postid'].'">'.$row['postid'].'</a>
 						<td><div class="post_title_td"><input class="post_title" value="'.htmlspecialchars($row['title'], ENT_QUOTES, "UTF-8").'" /></div></td> 
-						<td><div class="post_tags_td"><input class="post_tags" value="'.$row['tags'].'" /></div></td>
+						<td style="width:60%"><div class="post_tags_td"><input class="post_tags" value="'.$row['tags'].'"   name="q" id="tag_search_'.$row['postid'].'" autocomplete="off" placeholder="Tags" onkeyup="qa_tag_search_hints('.$row['postid'].')" onmouseup="qa_tag_search_hints('.$row['postid'].')" /></div>
+
+<div class="qa-form-tall-note2">
+                        <span id="tag_search_examples_title_'.$row['postid'].'" style="display:none;"> </span>
+                        <span id="tag_search_complete_title_'.$row['postid'].'" style="display:none;"></span>
+                        <span id="tag_search_hints_'.$row['postid'].'"></span></div>
+</td>
 					</tr>';
 			}
 			$tagtable .= "</table>";
@@ -301,6 +312,7 @@
 						var posttags = recentTR.find("input.post_tags").val();
 						// alert(postid + " | " + posttitle + " | " + posttags);
 						// var senddata = "postid="+postid+"&title="+posttitle+"&tags="+posttags;
+						recentTR.find("#tag_search_hints_"+postid).fadeOut(1500, function(){$(this).remove() });
 						var dataArray = {
 							postid: postid,
 							title: posttitle,

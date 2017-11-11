@@ -25,10 +25,13 @@
 
 	// page
 	qa_register_plugin_module('page', 'q2apro-quickedit-page.php', 'q2apro_quickedit', 'Quick-Edit Page');
+	//ajax page
+	qa_register_plugin_module('page', 'q2apro-quickedit-ajax-page.php', 'q2apro_quickedit_ajax', 'Quick-Edit Ajax Page');
 
 	// admin
 	qa_register_plugin_module('module', 'q2apro-quickedit-admin.php', 'q2apro_quickedit_admin', 'Quick-Edit Admin');
         
+qa_register_plugin_layer('q2apro-quickedit-layer.php', 'Quick-Edit Layer');
 
 /*
 	Omit PHP closing tag to help avoid accidental output
