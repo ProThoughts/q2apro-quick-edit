@@ -177,12 +177,12 @@
 					<tr data-original="'.$row['postid'].'">
 						<td><a class="tooltipS" title="'.$contentPreview.'" target="_blank" href="./'.$row['postid'].'?state=edit-'.$row['postid'].'">'.$row['postid'].'</a>
 						<td><div class="post_title_td"><input class="post_title" value="'.htmlspecialchars($row['title'], ENT_QUOTES, "UTF-8").'" /></div></td> 
-						<td style="width:60%"><div class="post_tags_td"><input class="post_tags" value="'.$row['tags'].'"   name="q" id="tag_search_'.$row['postid'].'" autocomplete="off" placeholder="Tags" onkeyup="qa_tag_search_hints('.$row['postid'].')" onmouseup="qa_tag_search_hints('.$row['postid'].')" /></div>
+						<td style="width:60%"><div class="post_tags_td"><input class="post_tags" value="'.$row['tags'].'"   name="q" id="tag_edit_'.$row['postid'].'" autocomplete="off" placeholder="Tags" onkeyup="qa_tag_edit_hints('.$row['postid'].')" onmouseup="qa_tag_edit_hints('.$row['postid'].')" /></div>
 
 <div class="qa-form-tall-note2">
-                        <span id="tag_search_examples_title_'.$row['postid'].'" style="display:none;"> </span>
-                        <span id="tag_search_complete_title_'.$row['postid'].'" style="display:none;"></span>
-                        <span id="tag_search_hints_'.$row['postid'].'"></span></div>
+                        <span id="tag_edit_examples_title_'.$row['postid'].'" style="display:none;"> </span>
+                        <span id="tag_edit_complete_title_'.$row['postid'].'" style="display:none;"></span>
+                        <span id="tag_edit_hints_'.$row['postid'].'"></span></div>
 </td>
 					</tr>';
 			}
@@ -312,7 +312,7 @@
 						var posttags = recentTR.find("input.post_tags").val();
 						// alert(postid + " | " + posttitle + " | " + posttags);
 						// var senddata = "postid="+postid+"&title="+posttitle+"&tags="+posttags;
-						recentTR.find("#tag_search_hints_"+postid).fadeOut(1500, function(){$(this).remove() });
+						recentTR.find("#tag_edit_hints_"+postid).fadeOut(1500, function(){$(this).remove() });
 						var dataArray = {
 							postid: postid,
 							title: posttitle,

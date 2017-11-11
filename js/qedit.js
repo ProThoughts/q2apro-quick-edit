@@ -1,27 +1,27 @@
-function qa_tag_search_hints(postid)
+function qa_tag_edit_hints(postid)
 {
-	var elem=document.getElementById('tag_search_'+postid);
+	var elem=document.getElementById('tag_edit_'+postid);
 	var html='';
 	var completed=false;
 
 	// first try to auto-complete
 	if (qa_tags_complete) {
-		var parts=qa_tag_search_typed_parts(elem);
+		var parts=qa_tag_edit_typed_parts(elem);
 
 		if (parts.typed) {
-			html=qa_search_tags_to_html((qa_html_unescape(qa_tags_examples+','+qa_tags_complete)).split(','), parts.typed.toLowerCase());
+			html=qa_edit_tags_to_html((qa_html_unescape(qa_tags_examples+','+qa_tags_complete)).split(','), parts.typed.toLowerCase());
 			completed=html ? true : false;
 		}
 	}
 
 	// otherwise show examples
 	if (qa_tags_examples && !completed)
-		html=qa_search_tags_to_html((qa_html_unescape(qa_tags_examples)).split(','), null);
+		html=qa_edit_tags_to_html((qa_html_unescape(qa_tags_examples)).split(','), null);
 
 	// set title visiblity and hint list
-	document.getElementById('tag_search_examples_title_'+postid).style.display=(html && !completed) ? '' : 'none';
-	document.getElementById('tag_search_complete_title_'+postid).style.display=(html && completed) ? '' : 'none';
-	document.getElementById('tag_search_hints_'+postid).innerHTML=html;
+	document.getElementById('tag_edit_examples_title_'+postid).style.display=(html && !completed) ? '' : 'none';
+	document.getElementById('tag_edit_complete_title_'+postid).style.display=(html && completed) ? '' : 'none';
+	document.getElementById('tag_edit_hints_'+postid).innerHTML=html;
 }
 
 
@@ -29,16 +29,16 @@ function qa_tag_search_hints(postid)
 
 
 
-function qa_tag_search_click(link)
+function qa_tag_edit_click(link)
 
 {
 
 	var id = link.parentNode.id;
 	var post = id.split("_");
 	var postid = post[post.length-1];
-	var elem=document.getElementById("tag_search_"+postid);
+	var elem=document.getElementById("tag_edit_"+postid);
 
-	var parts=qa_tag_search_typed_parts(elem);
+	var parts=qa_tag_edit_typed_parts(elem);
 
 
 
@@ -73,7 +73,7 @@ function qa_tag_search_click(link)
 
 //	elem.focus();
 
-	qa_tag_search_hints(postid);
+	qa_tag_edit_hints(postid);
 
 
 
@@ -84,7 +84,7 @@ function qa_tag_search_click(link)
 
 
 
-function qa_search_tags_to_html(tags, matchlc)
+function qa_edit_tags_to_html(tags, matchlc)
 
 {
 
@@ -128,7 +128,7 @@ function qa_search_tags_to_html(tags, matchlc)
 
 
 
-				html+=qa_tag_search_template.replace(/\^/g, inner.replace('$', '$$$$'))+' '; // replace ^ in template, escape $s
+				html+=qa_tag_edit_template.replace(/\^/g, inner.replace('$', '$$$$'))+' '; // replace ^ in template, escape $s
 
 
 
@@ -149,26 +149,25 @@ function qa_search_tags_to_html(tags, matchlc)
 }
 
 
-function qa_tag_search_typed_parts(elem)
+function qa_tag_edit_typed_parts(elem)
 
 {
 
-	var caret=elem.value.length-qa_tag_search_caret_from_end(elem);
+	var caret=elem.value.length-qa_tag_edit_caret_from_end(elem);
 
 	var active=elem.value.substring(0, caret);
 
-	console.log("active = "+active);
 	var passive=elem.value.substring(active.length);
 
 
-	var qa_tag_search_onlycomma = false;
+	var qa_tag_edit_onlycomma = false;
 	// if the caret is in the middle of a word, move the end of word from passive to active
 
 	if (
 
-			active.match(qa_tag_search_onlycomma ? /[^\s,][^,]*$/ : /[^\s,]$/) &&
+			active.match(qa_tag_edit_onlycomma ? /[^\s,][^,]*$/ : /[^\s,]$/) &&
 
-			(adjoinmatch=passive.match(qa_tag_search_onlycomma ? /^[^,]*[^\s,][^,]*/ : /^[^\s,]+/))
+			(adjoinmatch=passive.match(qa_tag_edit_onlycomma ? /^[^,]*[^\s,][^,]*/ : /^[^\s,]+/))
 
 	   ) {
 
@@ -182,7 +181,7 @@ function qa_tag_search_typed_parts(elem)
 
 	// find what has been typed so far
 
-	var typedmatch=active.match(qa_tag_search_onlycomma ? /[^\s,]+[^,]*$/ : /[^\s,]+$/) || [''];
+	var typedmatch=active.match(qa_tag_edit_onlycomma ? /[^\s,]+[^,]*$/ : /[^\s,]+$/) || [''];
 
 
 
@@ -190,7 +189,7 @@ function qa_tag_search_typed_parts(elem)
 
 }
 
-function qa_tag_search_caret_from_end(elem)
+function qa_tag_edit_caret_from_end(elem)
 
 {
 
