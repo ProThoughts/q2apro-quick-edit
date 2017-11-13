@@ -79,7 +79,7 @@ class q2apro_quickedit {
 			}
 			else {
 				require_once QA_INCLUDE_DIR.'app/users.php';
-				$userid = 3;//qa_get_logged_in_userid();
+				$userid = qa_get_logged_in_userid();
 				$tagsIn = str_replace(' ', ',', $posttags); // convert spaces to comma
 				// process new tags
 				require_once QA_INCLUDE_DIR.'qa-app-posts.php';
