@@ -122,7 +122,9 @@ class q2apro_quickedit {
 		$pagesize = 500; // items per page
 		$count = qa_opt('cache_qcount'); // items total
 		$qa_content['page_links'] = qa_html_page_links(qa_request(), $start, $pagesize, $count, true); // last parameter is prevnext
-		$tagfilter = $_GET['tagfilter'];
+		$tagfilter = null;
+		if(isset($_GET['tagfilter']))
+			$tagfilter = $_GET['tagfilter'];
 		$tagstring = '';
 		if($tagfilter) $tagstring = " and tags like '%".$tagfilter."%'";
 

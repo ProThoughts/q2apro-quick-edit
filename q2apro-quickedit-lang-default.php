@@ -31,6 +31,7 @@
 		'th_postid' => 'Post-ID',
 		'th_questiontitle' => 'Question Title',
 		'th_posttags' => 'Tags',
+		'th_postcategory' => 'Category',
 	);
 
 
