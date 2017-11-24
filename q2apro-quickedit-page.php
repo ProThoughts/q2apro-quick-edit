@@ -85,15 +85,6 @@ class q2apro_quickedit {
 				require_once QA_INCLUDE_DIR.'qa-app-posts.php';
 				qa_post_set_content($postid, $posttitle, null, null, $tagsIn, null,null, $userid, null, null); 
 				$tags = qa_post_tags_to_tagstring($tagsIn); // correctly parse tags string
-				// update post with new tags
-				//	qa_db_query_sub('UPDATE ^posts SET tags=# 
-				//						WHERE `postid`=#
-				//						LIMIT 1', $tags, $postid);
-
-				// Update post with new title
-				//	qa_db_query_sub('UPDATE ^posts SET title=# 
-				//						WHERE `postid`=#
-				//						LIMIT 1', $posttitle, $postid);
 			} // end db update
 
 			// header('Content-Type: text/plain; charset=utf-8');
@@ -122,7 +113,9 @@ class q2apro_quickedit {
 		$pagesize = 500; // items per page
 		$count = qa_opt('cache_qcount'); // items total
 		$qa_content['page_links'] = qa_html_page_links(qa_request(), $start, $pagesize, $count, true); // last parameter is prevnext
-		$tagfilter = $_GET['tagfilter'];
+		$tagfilter = null;
+		if(isset($_GET['tagfilter']))
+			$tagfilter = $_GET['tagfilter'];
 		$tagstring = '';
 		if($tagfilter) $tagstring = " and tags like '%".$tagfilter."%'";
 
@@ -149,13 +142,13 @@ class q2apro_quickedit {
 
 				<tr data-original="'.$row['postid'].'">
 				<td><a class="tooltipS" title="'.$contentPreview.'" target="_blank" href="./'.$row['postid'].'?state=edit-'.$row['postid'].'">'.$row['postid'].'</a>
-				<td><div class="post_title_td"><input class="post_title" value="'.htmlspecialchars($row['title'], ENT_QUOTES, "UTF-8").'" /></div></td> 
-				<td style="width:60%"><div class="post_tags_td"><input class="post_tags" value="'.$row['tags'].'"   name="q" id="tag_edit_'.$row['postid'].'" autocomplete="off" placeholder="Tags" onkeyup="qa_tag_edit_hints('.$row['postid'].')" onmouseup="qa_tag_edit_hints('.$row['postid'].')" /></div>
+				<td><div class="post_title_td"><input class="post_title"  value="'.htmlspecialchars($row['title'], ENT_QUOTES, "UTF-8").'" /></div></td> 
+				<td style="width:60%"><div class="post_tags_td"><input class="post_tags"  value="'.$row['tags'].'"   name="q" id="tag_edit_'.$row['postid'].'" autocomplete="off" placeholder="Tags" onkeyup="qa_tag_edit_hints('.$row['postid'].')" onmouseup="qa_tag_edit_hints('.$row['postid'].')" /></div>
 
 				<div class="qa-form-tall-note2">
 				<span id="tag_edit_examples_title_'.$row['postid'].'" style="display:none;"> </span>
 				<span id="tag_edit_complete_title_'.$row['postid'].'" style="display:none;"></span>
-				<span id="tag_edit_hints_'.$row['postid'].'"></span></div>
+				<span id="tag_edit_hints_'.$row['postid'].'" class="tag_examples"></span></div>
 				</td>
 				</tr>';
 		}
@@ -242,19 +235,35 @@ cursor:pointer;
 		$qa_content['custom'.++$c] = '
 			<script type="text/javascript">
 			$(document).ready(function(){
-					var recentTR;
-					$(".post_title, .post_tags").click( function() {
-							// remove former css
+					var recentTR = null;
+				
+					$(document).click( function(e) {
+						var focused = $(e.target);	
+							var currentTR =  null;
+							if(focused.parent().hasClass("qa-tag-link")) return;
+							if(focused.hasClass("post_title") || focused.hasClass("post_tags"))
+								 currentTR = focused.parent().parent().parent();
+							var postid1 = null, postid2 = null;
+							if(recentTR) postid1 = recentTR.attr("data-original"); 
+							if(currentTR) postid2 = currentTR.attr("data-original"); 
+							if(recentTR && ((postid1 !== postid2)))
+							{
+								console.log("rec = "+postid1);
+								console.log("cur = " +postid2);
+								doAjaxPost(recentTR);
+								recentTR = currentTR;
+							}
+							else if(recentTR != null){ return;}
+							else recentTR = currentTR;
 							$(".post_title, .post_tags").removeClass("inputactive");
-							recentTR = $(this).parent().parent().parent();
-							recentTR.find("input.post_title, input.post_tags").addClass("inputactive");
+							if(currentTR) currentTR.find("input.post_title, input.post_tags").addClass("inputactive");
 							// alert(recentTR.find("input.post_tags").val());
 
 							// add Update-Button if not yet added
-							if(recentTR.find(".post_tags_td").has(".sendr").length == 0) {
+							if(currentTR && (currentTR.find(".post_tags_td").has(".sendr").length == 0)) {
 							// remove all other update buttons
-							$(".sendr").fadeOut(200, function(){$(this).remove() });
-							recentTR.find(".post_tags_td").append("<a class=\'sendr\'>Update</a>");
+						//	$(".sendr").fadeOut(1500, function(){$(this).remove() });
+							if(currentTR)currentTR.find(".post_tags_td").append("<a class=\'sendr\'>Update</a>");
 							}
 							});
 					$(document).keyup(function(e) {
@@ -262,7 +271,7 @@ cursor:pointer;
 							var focused = $(":focus");
 							// if enter key and input field selected
 							if(e.which == 13 && (focused.hasClass("post_title") || focused.hasClass("post_tags"))) { 
-							doAjaxPost();
+							doAjaxPost(recentTR);
 							}
 							// escape has been pressed
 							else if(e.which == 27) {
@@ -273,19 +282,21 @@ cursor:pointer;
 							// remove active css class
 							$(".post_title, .post_tags").removeClass("inputactive");									
 							}
+							else if((focused.hasClass("post_title") || focused.hasClass("post_tags"))) { 
+							if(recentTR == null) recentTR = focused.parent().parent().parent();
+							}
 							});
 					$(document).on("click", ".sendr", function() {
-							doAjaxPost();
+							doAjaxPost(recentTR);
 							});
-
-					function doAjaxPost() {
+					function doAjaxPost(recentTR, auto=false) {
 						// get post data from <tr> element
 						var postid = recentTR.attr("data-original"); 
 						var posttitle = recentTR.find("input.post_title").val();
 						var posttags = recentTR.find("input.post_tags").val();
 						// alert(postid + " | " + posttitle + " | " + posttags);
 						// var senddata = "postid="+postid+"&title="+posttitle+"&tags="+posttags;
-						recentTR.find("#tag_edit_hints_"+postid).fadeOut(1500, function(){$(this).remove() });
+						recentTR.find("#tag_edit_hints_"+postid).fadeOut(100, function(){$(this).innerHTML = "";$(this).style.visibility="hidden"; });
 						var dataArray = {
 postid: postid,
 	title: posttitle,
@@ -316,11 +327,11 @@ recentTR.find("input.post_title").val(data["title"]);
 recentTR.find("input.post_tags").val(data["tags"]);
 
 // remove update button
-recentTR.find(".sendrOff").fadeOut(1500, function(){$(this).remove() });
+recentTR.find(".sendrOff").fadeOut(600, function(){$(this).remove() });
 // remove focus from input field
-$(":focus").blur();
+recentTR.find(":focus").blur();
 // remove active css class
-$(".post_title, .post_tags").removeClass("inputactive");									
+recentTR.find(".post_title, .post_tags").removeClass("inputactive");									
 }
 });
 }
