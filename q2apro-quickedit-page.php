@@ -142,8 +142,8 @@ class q2apro_quickedit {
 
 				<tr data-original="'.$row['postid'].'">
 				<td><a class="tooltipS" title="'.$contentPreview.'" target="_blank" href="./'.$row['postid'].'?state=edit-'.$row['postid'].'">'.$row['postid'].'</a>
-				<td><div class="post_title_td"><input class="post_title" value="'.htmlspecialchars($row['title'], ENT_QUOTES, "UTF-8").'" /></div></td> 
-				<td style="width:60%"><div class="post_tags_td"><input class="post_tags" value="'.$row['tags'].'"   name="q" id="tag_edit_'.$row['postid'].'" autocomplete="off" placeholder="Tags" onkeyup="qa_tag_edit_hints('.$row['postid'].')" onmouseup="qa_tag_edit_hints('.$row['postid'].')" /></div>
+				<td><div class="post_title_td"><input class="post_title"  value="'.htmlspecialchars($row['title'], ENT_QUOTES, "UTF-8").'" /></div></td> 
+				<td style="width:60%"><div class="post_tags_td"><input class="post_tags"  value="'.$row['tags'].'"   name="q" id="tag_edit_'.$row['postid'].'" autocomplete="off" placeholder="Tags" onkeyup="qa_tag_edit_hints('.$row['postid'].')" onmouseup="qa_tag_edit_hints('.$row['postid'].')" /></div>
 
 				<div class="qa-form-tall-note2">
 				<span id="tag_edit_examples_title_'.$row['postid'].'" style="display:none;"> </span>
@@ -235,11 +235,24 @@ cursor:pointer;
 		$qa_content['custom'.++$c] = '
 			<script type="text/javascript">
 			$(document).ready(function(){
-					var recentTR;
+					var recentTR = null;
+				
 					$(".post_title, .post_tags").click( function() {
 							// remove former css
+							var currentTR = $(this).parent().parent().parent();
+							var postid1 = null;
+							if(recentTR) postid1 = recentTR.attr("data-original"); 
+							var postid2 = currentTR.attr("data-original"); 
+							if(recentTR && ((postid1 !== postid2)))
+							{
+								var postid = recentTR.attr("data-original"); 
+								var postid2 = currentTR.attr("data-original"); 
+								doAjaxPost(recentTR);
+								recentTR = null; return;
+							}
+							else if(recentTR != null){ return;}
+							else recentTR = currentTR;
 							$(".post_title, .post_tags").removeClass("inputactive");
-							recentTR = $(this).parent().parent().parent();
 							recentTR.find("input.post_title, input.post_tags").addClass("inputactive");
 							// alert(recentTR.find("input.post_tags").val());
 
@@ -255,7 +268,7 @@ cursor:pointer;
 							var focused = $(":focus");
 							// if enter key and input field selected
 							if(e.which == 13 && (focused.hasClass("post_title") || focused.hasClass("post_tags"))) { 
-							doAjaxPost();
+							doAjaxPost(recentTR);
 							}
 							// escape has been pressed
 							else if(e.which == 27) {
@@ -268,10 +281,9 @@ cursor:pointer;
 							}
 							});
 					$(document).on("click", ".sendr", function() {
-							doAjaxPost();
+							doAjaxPost(recentTR);
 							});
-
-					function doAjaxPost() {
+					function doAjaxPost(recentTR, auto=false) {
 						// get post data from <tr> element
 						var postid = recentTR.attr("data-original"); 
 						var posttitle = recentTR.find("input.post_title").val();
@@ -296,6 +308,7 @@ cache: false,
 success: function(data) {
 //dev
 console.log("server returned:"+data+" #Tags: "+data["tags"]);
+if(auto) return;
 
 // prevent another click on button by assigning another class id
 $(".sendr").attr("class","sendrOff");
