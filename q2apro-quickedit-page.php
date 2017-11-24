@@ -85,15 +85,6 @@ class q2apro_quickedit {
 				require_once QA_INCLUDE_DIR.'qa-app-posts.php';
 				qa_post_set_content($postid, $posttitle, null, null, $tagsIn, null,null, $userid, null, null); 
 				$tags = qa_post_tags_to_tagstring($tagsIn); // correctly parse tags string
-				// update post with new tags
-				//	qa_db_query_sub('UPDATE ^posts SET tags=# 
-				//						WHERE `postid`=#
-				//						LIMIT 1', $tags, $postid);
-
-				// Update post with new title
-				//	qa_db_query_sub('UPDATE ^posts SET title=# 
-				//						WHERE `postid`=#
-				//						LIMIT 1', $posttitle, $postid);
 			} // end db update
 
 			// header('Content-Type: text/plain; charset=utf-8');
