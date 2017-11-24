@@ -148,7 +148,7 @@ class q2apro_quickedit {
 				<div class="qa-form-tall-note2">
 				<span id="tag_edit_examples_title_'.$row['postid'].'" style="display:none;"> </span>
 				<span id="tag_edit_complete_title_'.$row['postid'].'" style="display:none;"></span>
-				<span id="tag_edit_hints_'.$row['postid'].'"></span></div>
+				<span id="tag_edit_hints_'.$row['postid'].'" class="tag_examples"></span></div>
 				</td>
 				</tr>';
 		}
@@ -237,30 +237,33 @@ cursor:pointer;
 			$(document).ready(function(){
 					var recentTR = null;
 				
-					$(".post_title, .post_tags").click( function() {
-							// remove former css
-							var currentTR = $(this).parent().parent().parent();
-							var postid1 = null;
+					$(document).click( function(e) {
+						var focused = $(e.target);	
+							var currentTR =  null;
+							if(focused.parent().hasClass("qa-tag-link")) return;
+							if(focused.hasClass("post_title") || focused.hasClass("post_tags"))
+								 currentTR = focused.parent().parent().parent();
+							var postid1 = null, postid2 = null;
 							if(recentTR) postid1 = recentTR.attr("data-original"); 
-							var postid2 = currentTR.attr("data-original"); 
+							if(currentTR) postid2 = currentTR.attr("data-original"); 
 							if(recentTR && ((postid1 !== postid2)))
 							{
-								var postid = recentTR.attr("data-original"); 
-								var postid2 = currentTR.attr("data-original"); 
+								console.log("rec = "+postid1);
+								console.log("cur = " +postid2);
 								doAjaxPost(recentTR);
-								recentTR = null; return;
+								recentTR = currentTR;
 							}
 							else if(recentTR != null){ return;}
 							else recentTR = currentTR;
 							$(".post_title, .post_tags").removeClass("inputactive");
-							recentTR.find("input.post_title, input.post_tags").addClass("inputactive");
+							if(currentTR) currentTR.find("input.post_title, input.post_tags").addClass("inputactive");
 							// alert(recentTR.find("input.post_tags").val());
 
 							// add Update-Button if not yet added
-							if(recentTR.find(".post_tags_td").has(".sendr").length == 0) {
+							if(currentTR && (currentTR.find(".post_tags_td").has(".sendr").length == 0)) {
 							// remove all other update buttons
-							$(".sendr").fadeOut(200, function(){$(this).remove() });
-							recentTR.find(".post_tags_td").append("<a class=\'sendr\'>Update</a>");
+						//	$(".sendr").fadeOut(1500, function(){$(this).remove() });
+							if(currentTR)currentTR.find(".post_tags_td").append("<a class=\'sendr\'>Update</a>");
 							}
 							});
 					$(document).keyup(function(e) {
@@ -279,6 +282,9 @@ cursor:pointer;
 							// remove active css class
 							$(".post_title, .post_tags").removeClass("inputactive");									
 							}
+							else if((focused.hasClass("post_title") || focused.hasClass("post_tags"))) { 
+							if(recentTR == null) recentTR = focused.parent().parent().parent();
+							}
 							});
 					$(document).on("click", ".sendr", function() {
 							doAjaxPost(recentTR);
@@ -290,7 +296,12 @@ cursor:pointer;
 						var posttags = recentTR.find("input.post_tags").val();
 						// alert(postid + " | " + posttitle + " | " + posttags);
 						// var senddata = "postid="+postid+"&title="+posttitle+"&tags="+posttags;
-						recentTR.find("#tag_edit_hints_"+postid).fadeOut(1500, function(){$(this).remove() });
+						recentTR.find("#tag_edit_hints_"+postid).fadeOut(100, function(){$(this).innerHTML = "";$(this).style.visibility="hidden"; });
+						//var hints = recentTR.find("#tag_edit_hints_"+postid).innerHTML="";
+						//var hints = 
+						//recentTR.find("#tag_edit_hints_"+postid).style.visibility="hidden";
+						//hints.innerHTML = "";
+						//hints.style.display = "";
 						var dataArray = {
 postid: postid,
 	title: posttitle,
@@ -308,7 +319,6 @@ cache: false,
 success: function(data) {
 //dev
 console.log("server returned:"+data+" #Tags: "+data["tags"]);
-if(auto) return;
 
 // prevent another click on button by assigning another class id
 $(".sendr").attr("class","sendrOff");
@@ -322,11 +332,11 @@ recentTR.find("input.post_title").val(data["title"]);
 recentTR.find("input.post_tags").val(data["tags"]);
 
 // remove update button
-recentTR.find(".sendrOff").fadeOut(1500, function(){$(this).remove() });
+recentTR.find(".sendrOff").fadeOut(600, function(){$(this).remove() });
 // remove focus from input field
-$(":focus").blur();
+recentTR.find(":focus").blur();
 // remove active css class
-$(".post_title, .post_tags").removeClass("inputactive");									
+recentTR.find(".post_title, .post_tags").removeClass("inputactive");									
 }
 });
 }
