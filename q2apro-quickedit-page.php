@@ -297,11 +297,6 @@ cursor:pointer;
 						// alert(postid + " | " + posttitle + " | " + posttags);
 						// var senddata = "postid="+postid+"&title="+posttitle+"&tags="+posttags;
 						recentTR.find("#tag_edit_hints_"+postid).fadeOut(100, function(){$(this).innerHTML = "";$(this).style.visibility="hidden"; });
-						//var hints = recentTR.find("#tag_edit_hints_"+postid).innerHTML="";
-						//var hints = 
-						//recentTR.find("#tag_edit_hints_"+postid).style.visibility="hidden";
-						//hints.innerHTML = "";
-						//hints.style.display = "";
 						var dataArray = {
 postid: postid,
 	title: posttitle,
