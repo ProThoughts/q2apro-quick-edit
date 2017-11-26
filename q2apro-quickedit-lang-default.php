@@ -25,12 +25,13 @@
 		'contact' => 'For questions please visit ^1q2apro.com^2',
 		
 		'access_problem' => 'Could not access server.',
-		'edit_hint' => 'Click on the post titles or tags to edit. After the edit hit ENTER or use the update button. Hit ESC to cancel.',
+		'edit_hint' => 'Click on the post titles or tags to edit. After the edit hit ENTER or click anywhere on screen. Hit ESC to cancel.',
 		'edit_hint_q' => 'Mouse over the post id to get a content preview of the question.',
 		'page_title' => 'Quick Edit',
 		'th_postid' => 'Post-ID',
 		'th_questiontitle' => 'Question Title',
 		'th_posttags' => 'Tags',
+		'th_postcategory' => 'Category',
 	);
 
 
